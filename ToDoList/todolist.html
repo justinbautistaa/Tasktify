@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasktify - To-Do List</title>
+    <link rel="icon" type="image/png" href="pictures/logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: url('pictures/background.jpg') no-repeat center center/cover;
+            color: white;
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 80%;
+            max-width: 900px;
+        }
+
+        .container {
+            background: rgba(30, 30, 30, 0.95);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            width: 40%;
+            text-align: center;
+        }
+
+        .task-list-container {
+            width: 55%;
+        }
+
+        h2 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .task-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            outline: none;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .primary-btn { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .danger-btn { background: linear-gradient(135deg, #dc3545, #a71d2a); }
+        .success-btn { background: linear-gradient(135deg, #28a745, #1e7e34); }
+
+        .task-section {
+            margin-top: 20px;
+        }
+
+        .task-list {
+            list-style: none;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .done { text-decoration: line-through; opacity: 0.6; }
+        .task-buttons button { margin-left: 5px; border-radius: 6px; padding: 5px 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h2>Tasktify</h2>
+
+    <div class="content-container">
+        <!-- Task Input Form -->
+        <div class="container">
+            <div class="task-inputs">
+                <input type="text" id="taskName" placeholder="Task Name">
+                <select id="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+                <input type="date" id="endDate">
+                <input type="time" id="endTime">
+                <button class="primary-btn" onclick="addTask()">Add Task</button>
+                <button class="danger-btn" onclick="removeAllTasks()">Remove All Tasks</button>
+            </div>
+        </div>
+
+        <!-- Task Lists -->
+        <div class="task-list-container">
+            <div class="task-section">
+                <h3>Pending Tasks</h3>
+                <ul class="task-list" id="taskList"></ul>
+            </div>
+            <div class="task-section">
+                <h3>Completed Tasks</h3>
+                <ul class="task-list" id="completedList"></ul>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        requestNotificationPermission();
+        loadTasks();
+        setInterval(checkDueTasks, 60000); // Check every minute
+    });
+
+    function requestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
+    }
+
+    function addTask() {
+        const taskName = document.getElementById("taskName").value.trim();
+        const priority = document.getElementById("priority").value;
+        const endDate = document.getElementById("endDate").value;
+        const endTime = document.getElementById("endTime").value;
+
+        if (!taskName) {
+            alert("Please enter a task name.");
+            return;
+        }
+
+        const task = { name: taskName, priority, endDate, endTime, done: false };
+        saveTask(task);
+        renderTasks();
+        document.getElementById("taskName").value = "";
+    }
+
+    function saveTask(task) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks.push(task);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+        const taskList = document.getElementById("taskList");
+        const completedList = document.getElementById("completedList");
+
+        taskList.innerHTML = "";
+        completedList.innerHTML = "";
+
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        tasks.forEach((task, index) => {
+            const li = document.createElement("li");
+            li.classList.add("task");
+            if (task.done) li.classList.add("done");
+
+            li.innerHTML = `
+                <span>${task.name} (${task.priority}) [${task.endDate} ${task.endTime}]</span>
+                <div class="task-buttons">
+                    <button class="success-btn" onclick="confirmMarkDone(${index})">✔</button>
+                    <button class="danger-btn" onclick="confirmRemoveTask(${index})">❌</button>
+                </div>
+            `;
+
+            if (task.done) {
+                completedList.appendChild(li);
+            } else {
+                taskList.appendChild(li);
+            }
+        });
+    }
+
+    function confirmMarkDone(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        if (confirm(`Are you sure you want to mark "${tasks[index].name}" as done?`)) {
+            markDone(index);
+        }
+    }
+
+    function markDone(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks[index].done = !tasks[index].done;
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    function confirmRemoveTask(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        if (confirm(`Are you sure you want to delete "${tasks[index].name}"?`)) {
+            removeTask(index);
+        }
+    }
+
+    function removeTask(index) {
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasks.splice(index, 1);
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        renderTasks();
+    }
+
+    function removeAllTasks() {
+        if (confirm("Are you sure you want to remove all tasks?")) {
+            localStorage.removeItem("tasks");
+            renderTasks();
+        }
+    }
+
+    function loadTasks() {
+        renderTasks();
+    }
+</script>
+
+</body>
+</html>

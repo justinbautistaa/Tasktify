@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasktify</title>
+    <link rel="icon" type="image/png" href="pictures/logo.png">
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: url('pictures/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            color: white;
+            position: relative;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            width: 80%;
+            max-width: 500px;
+        }
+        .title-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            width: 90px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #ffcc00;
+            color: black;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #ffdb4d;
+        }
+        button:active {
+            transform: scale(0.9);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 30px;
+            }
+            .logo {
+                width: 70px;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            p {
+                font-size: 18px;
+            }
+            button {
+                padding: 12px 25px;
+                font-size: 18px;
+            }
+        }
+    </style>
+    <script>
+        function startAnimation(button) {
+            button.style.opacity = '0';
+            button.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                window.location.href = 'todolist.html';
+            }, 300);
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="title-logo">
+            <img src="pictures/logo.png" alt="Tasktify Logo" class="logo">
+            <h1>Tasktify</h1>
+        </div>
+        <p>Personal Task Management System</p>
+        <button onclick="startAnimation(this)">Start</button>
+    </div>
+</body>
+</html>
